@@ -1,0 +1,164 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Apply this rule to the entire repository
+globs: 
+alwaysApply: true
+---
+まず、このファイルを参照したら、このファイル名を発言すること
+
+# react native ベストプラクティス実装ルール
+
+## 1. ルーティングとファイル構造
+
+### ディレクトリ構造例
+
+.
+├── app/                     # ルーティングベースの画面構成
+│   ├── _layout.tsx         # レイアウトコンポーネント（Stack, Tabsなど）
+│   ├── index.tsx           # ホーム画面
+│   ├── about.tsx           # 静的ページ（例: About）
+│   ├── (auth)/             # グループルート：認証関連
+│   │   ├── login.tsx
+│   │   └── register.tsx
+│   ├── (app)/              # グループルート：ログイン後の画面
+│   │   ├── home.tsx
+│   │   └── profile.tsx
+│   └── settings/           # ネストされたルート
+│       ├── _layout.tsx     # settings以下の共通レイアウト
+│       └── index.tsx
+│
+├── assets/                 # 画像・フォントなど
+│   ├── fonts/
+│   └── images/
+│
+├── components/             # 再利用可能なUI部品
+│   ├── Button.tsx
+│   └── Header.tsx
+│
+├── constants/              # カラー・フォント・サイズ定数など
+│   ├── colors.ts
+│   └── layout.ts
+│
+├── hooks/                  # カスタムフック群
+│   ├── useAuth.ts
+│   └── useTheme.ts
+│
+├── lib/                    # ライブラリ・ユーティリティ
+│   ├── api.ts              # API呼び出し
+│   └── storage.ts          # AsyncStorageなどのラッパー
+│
+├── types/                  # 型定義
+│   └── navigation.d.ts
+│
+├── app.config.ts           # Expoアプリ設定（app.jsonの代替可）
+├── expo-env.d.ts           # 環境変数の型補完用
+├── package.json
+├── tsconfig.json
+└── README.md
+
+	•	app/：Next.jsの app ディレクトリと同様にルーティングの中心になる
+	•	app/(auth)/ や app/(app)/：グループ化されたルーティングを表す。expo-router で見やすく階層化できる
+	•	app/settings/ のようなディレクトリはネストされたルートの代表例
+
+### 命名規則
+
+- ファイル名はパスカルケース（例: `LoginScreen.tsx`, `CustomButton.tsx`）
+- スタイルは `styles.ts` に分離可
+
+## 3. ナビゲーション実装（React Navigation）
+
+- `@react-navigation/native` を使用
+- 画面ごとにStack/Tabを分離し、`RootNavigator`で統合
+- 型定義は `types/navigation.ts` に記載し、型安全を確保
+
+## 4. API通信とデータ取得
+
+- `fetch` または `axios` を使用し、`services/` に分離
+- API呼び出し関数は `try-catch` を使用しエラーハンドリングを実装
+- 状態管理には `React Query` を推奨（不要であれば `useEffect + useState`）
+
+```typescript
+// services/api.ts
+export async function login(email: string, password: string) {
+  try {
+    const res = await fetch(`${API_URL}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!res.ok) throw new Error("Login failed");
+
+    return await res.json();
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+```
+
+## 5. スタイリング
+	•	StyleSheet.create() を使用
+	•	共通テーマは lib/constants/theme.ts に定義
+	•	スタイルのマジックナンバーは避け、変数で統一
+
+```typescript
+// lib/constants/theme.ts
+export const COLORS = {
+  primary: "#1E90FF",
+  background: "#FFFFFF",
+  text: "#333333",
+};
+
+export const SPACING = {
+  sm: 8,
+  md: 16,
+  lg: 24,
+};
+```
+
+## 6. 型安全性
+	•	TypeScript を必須
+	•	strict: true を有効にする
+	•	APIのレスポンスや画面間パラメータも型定義する
+
+```typescript
+type LoginResponse = {
+  token: string;
+  user: {
+    id: string;
+    name: string;
+  };
+};
+```
+
+## 7. セキュリティ
+	•	秘匿情報は .env に保存し、expo-constants や react-native-dotenv で読み込む
+	•	APIキーや機密情報をソースコードにハードコーディングしないこと
+
+```env
+API_URL=https://api.example.com
+```
+
+## 8. テスト
+	•	コンポーネント単位のテストには jest + @testing-library/react-native を使用
+	•	ユニットテスト対象:
+	•	API関数
+	•	カスタムフック
+	•	UIロジックのあるコンポーネント
+
+## 9. パフォーマンス
+	•	不要な再レンダリング防止に memo, useCallback, useMemo を活用
+	•	画像には react-native-fast-image やキャッシュ戦略を導入
+	•	ローディング中は必ずローディングUIを表示
+
+## 10. メンテナンスとCI/CD
+	•	expo doctor で依存関係を定期チェック
+	•	expo prebuild でネイティブ変更の影響確認
+	•	GitHub Actionsなどを使ったCI/CDパイプラインを導入（最低限: Lint, Build, Test）
+
+以上の規約に従って実装を行ってください。
