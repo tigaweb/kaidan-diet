@@ -1,28 +1,56 @@
-import { Text, View, TouchableOpacity, SafeAreaView, StyleSheet } from "react-native";
-import { useEffect, useState } from "react";
-
+// @ts-ignore
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Text, View, TouchableOpacity, SafeAreaView, StyleSheet } from "react-native";
+import * as SQLite from 'expo-sqlite';
+import { useEffect, useState } from "react";
 
 type RootStackParamList = {
   Main: undefined;
 };
+
+// SQLite用の型定義
+// type SQLTransaction = {
+//   executeSql: (
+//     sqlStatement: string,
+//     args?: any[],
+//     callback?: (transaction: SQLTransaction, resultSet: { rows: { item: (idx: number) => any, length: number } }) => void,
+//     errorCallback?: (transaction: SQLTransaction, error: Error) => boolean
+//   ) => void;
+// };
+
+// type SQLDatabase = {
+//   transaction: (callback: (tx: SQLTransaction) => void) => void;
+// };
 
 export default function HomeScreen({ navigation }: NativeStackScreenProps<RootStackParamList>) {
   const [totalSessions, setTotalSessions] = useState(0);
   const [totalCalories, setTotalCalories] = useState(0);
   const [totalHeight, setTotalHeight] = useState(0);
 
-  // TODO: 実際のデータ取得処理を実装
+  const initDatabase = () => {
+    const db = SQLite.openDatabaseSync('kaidandiet.db');
+    
+    db.withTransactionSync(() => {
+      db.execSync(
+        'CREATE TABLE IF NOT EXISTS sessions (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, count INTEGER, calories REAL, height INTEGER);'
+      );
+
+      const result = db.getAllSync(
+        'SELECT SUM(count) as totalSessions, SUM(calories) as totalCalories, SUM(height) as totalHeight FROM sessions;',
+      );
+      
+      // クエリ結果を確認し、状態を更新
+      if (result && result.length > 0) {
+        const data = result[0];
+        setTotalSessions(data.totalSessions || 1110);
+        setTotalCalories(data.totalCalories || 0);
+        setTotalHeight(data.totalHeight || 0);
+      }
+    });
+  };
+
   useEffect(() => {
-    // ローカルストレージから累計データを取得
-    const mockData = {
-      sessions: 12,
-      calories: 45.6,
-      height: 2400 // cm単位
-    };
-    setTotalSessions(mockData.sessions);
-    setTotalCalories(mockData.calories);
-    setTotalHeight(mockData.height);
+    initDatabase();
   }, []);
 
   const handleStart = () => {
