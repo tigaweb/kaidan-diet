@@ -4,32 +4,20 @@ import { Text, View, TouchableOpacity, SafeAreaView, StyleSheet } from "react-na
 import * as SQLite from 'expo-sqlite';
 import { useEffect, useState } from "react";
 
-type RootStackParamList = {
-  Main: undefined;
+type SessionSummary = {
+  totalSessions: number;
+  totalCalories: number;
+  totalHeight: number;
 };
 
-// SQLite用の型定義
-// type SQLTransaction = {
-//   executeSql: (
-//     sqlStatement: string,
-//     args?: any[],
-//     callback?: (transaction: SQLTransaction, resultSet: { rows: { item: (idx: number) => any, length: number } }) => void,
-//     errorCallback?: (transaction: SQLTransaction, error: Error) => boolean
-//   ) => void;
-// };
-
-// type SQLDatabase = {
-//   transaction: (callback: (tx: SQLTransaction) => void) => void;
-// };
-
-export default function HomeScreen({ navigation }: NativeStackScreenProps<RootStackParamList>) {
+export default function HomeScreen({ navigation }: NativeStackScreenProps) {
   const [totalSessions, setTotalSessions] = useState(0);
   const [totalCalories, setTotalCalories] = useState(0);
   const [totalHeight, setTotalHeight] = useState(0);
 
   const initDatabase = () => {
     const db = SQLite.openDatabaseSync('kaidandiet.db');
-    
+
     db.withTransactionSync(() => {
       db.execSync(
         'CREATE TABLE IF NOT EXISTS sessions (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, count INTEGER, calories REAL, height INTEGER);'
@@ -38,10 +26,10 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
       const result = db.getAllSync(
         'SELECT SUM(count) as totalSessions, SUM(calories) as totalCalories, SUM(height) as totalHeight FROM sessions;',
       );
-      
+
       // クエリ結果を確認し、状態を更新
       if (result && result.length > 0) {
-        const data = result[0];
+        const data = result[0] as SessionSummary;
         setTotalSessions(data.totalSessions || 1110);
         setTotalCalories(data.totalCalories || 0);
         setTotalHeight(data.totalHeight || 0);
@@ -61,7 +49,7 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>階段ダイエット</Text>
-        
+
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
             <Text style={styles.statValue}>{totalSessions}</Text>
@@ -77,7 +65,7 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
           </View>
         </View>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.startButton}
           onPress={handleStart}
         >
