@@ -1,4 +1,3 @@
-// @ts-ignore
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Text, View, TouchableOpacity, SafeAreaView, StyleSheet } from "react-native";
 import * as SQLite from 'expo-sqlite';
@@ -10,7 +9,7 @@ type SessionSummary = {
   totalHeight: number;
 };
 
-export default function HomeScreen({ navigation }: NativeStackScreenProps) {
+export default function Index() {
   const [totalSessions, setTotalSessions] = useState(0);
   const [totalCalories, setTotalCalories] = useState(0);
   const [totalHeight, setTotalHeight] = useState(0);
@@ -42,7 +41,7 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps) {
   }, []);
 
   const handleStart = () => {
-    navigation.navigate('Main');
+    console.log("on click")
   };
 
   return (
