@@ -18,8 +18,15 @@ export default function Index() {
     const db = SQLite.openDatabaseSync('kaidandiet.db');
 
     db.withTransactionSync(() => {
+      // 開発時のみ：既存のテーブルを削除
+      try {
+        db.execSync('DROP TABLE IF EXISTS sessions;');
+      } catch (e) {
+        console.log('テーブル削除エラー:', e);
+      }
+
       db.execSync(
-        'CREATE TABLE IF NOT EXISTS sessions (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, count INTEGER, calories REAL, height INTEGER);'
+        'CREATE TABLE IF NOT EXISTS sessions (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, start_time TEXT, end_time TEXT, count INTEGER, calories REAL, height INTEGER);'
       );
 
       const result = db.getAllSync(
