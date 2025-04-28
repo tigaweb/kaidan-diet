@@ -3,8 +3,10 @@ import { Text, View, TouchableOpacity, SafeAreaView, StyleSheet } from "react-na
 import * as SQLite from 'expo-sqlite';
 import { useEffect, useState } from "react";
 import { SessionSummary } from '@/types';
+import { useRouter } from 'expo-router';
 
 export default function Index() {
+  const router = useRouter();
   const [totalSessions, setTotalSessions] = useState(0);
   const [totalCalories, setTotalCalories] = useState(0);
   const [totalHeight, setTotalHeight] = useState(0);
@@ -43,7 +45,7 @@ export default function Index() {
   }, []);
 
   const handleStart = () => {
-    console.log("on click")
+    router.push('/session');
   };
 
   return (
