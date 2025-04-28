@@ -4,10 +4,13 @@
     "strict": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
+    "baseUrl": ".",
     "paths": {
       "@/*": [
         "./*"
-      ]
+      ],
+      "@/types/*": ["src/types/*"],
+      "@/types": ["src/types"]
     }
   },
   "include": [

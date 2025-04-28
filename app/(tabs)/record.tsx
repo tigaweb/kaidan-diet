@@ -2,32 +2,7 @@ import { Calendar } from 'react-native-calendars';
 import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
 import { useEffect, useState } from 'react';
 import * as SQLite from 'expo-sqlite';
-
-type SessionSummary = {
-  totalCount: number;
-  totalCalories: number;
-  totalHeight: number;
-  totalDuration: number;
-  sessions: {
-    start_time: string;
-    end_time: string;
-  }[];
-};
-
-type MarkedDates = {
-  [date: string]: {
-    marked?: boolean;
-    selected?: boolean;
-  };
-};
-
-type DayObject = {
-  dateString: string;
-  day: number;
-  month: number;
-  year: number;
-  timestamp: number;
-};
+import { SessionSummary, MarkedDates, DayObject, SessionDateRow } from '@/types';
 
 type SessionData = {
   totalCount: number;
@@ -35,10 +10,6 @@ type SessionData = {
   totalHeight: number;
   start_times: string;
   end_times: string;
-};
-
-type SessionDateRow = {
-  session_date: string;
 };
 
 export default function Record() {
@@ -100,7 +71,7 @@ export default function Record() {
         });
 
         setSessionSummary({
-          totalCount: data.totalCount,
+          totalSessions: data.totalCount,
           totalCalories: data.totalCalories,
           totalHeight: data.totalHeight,
           totalDuration,
@@ -154,7 +125,7 @@ export default function Record() {
             
             <View style={styles.statItem}>
               <Text style={styles.label}>往復回数</Text>
-              <Text style={styles.value}>{sessionSummary.totalCount}回</Text>
+              <Text style={styles.value}>{sessionSummary.totalSessions}回</Text>
             </View>
             
             <View style={styles.statItem}>

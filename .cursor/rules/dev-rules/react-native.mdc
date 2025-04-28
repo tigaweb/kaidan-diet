@@ -68,6 +68,9 @@ alwaysApply: true
 
 - ファイル名はパスカルケース（例: `LoginScreen.tsx`, `CustomButton.tsx`）
 - スタイルは `styles.ts` に分離可
+- データベース関連の型: `[EntityName]DBRow`
+- ビジネスロジック層の型: `[EntityName]Summary`, `[EntityName]Data`
+- UI関連の型: `[ComponentName]Props`, `[ComponentName]State`
 
 ## 3. ナビゲーション実装（React Navigation）
 
@@ -135,6 +138,27 @@ type LoginResponse = {
   };
 };
 ```
+
+### 型定義の配置ルール
+1. データベース層の型は `types/database/` に配置
+2. ビジネスロジック層の型は `types/models/` に配置
+3. UI固有の型は `types/ui/` に配置
+4. 共通で使用する型は `types/index.ts` からエクスポート
+
+### インポート方法
+```typescript
+// 個別の型をインポート
+import { SessionSummary } from '@/types/models/session';
+
+// 複数の型をインポート
+import { SessionSummary, MarkedDates } from '@/types';
+```
+
+### 注意事項
+- 型定義の重複を避ける
+- コンポーネントファイル内での型定義は最小限に
+- 型定義は適切な層に配置する
+- 型の再利用性を考慮する
 
 ## 7. セキュリティ
 	•	秘匿情報は .env に保存し、expo-constants や react-native-dotenv で読み込む

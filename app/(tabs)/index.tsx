@@ -2,12 +2,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Text, View, TouchableOpacity, SafeAreaView, StyleSheet } from "react-native";
 import * as SQLite from 'expo-sqlite';
 import { useEffect, useState } from "react";
-
-type SessionSummary = {
-  totalSessions: number;
-  totalCalories: number;
-  totalHeight: number;
-};
+import { SessionSummary } from '@/types';
 
 export default function Index() {
   const [totalSessions, setTotalSessions] = useState(0);
