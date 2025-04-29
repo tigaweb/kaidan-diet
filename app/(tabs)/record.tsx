@@ -1,5 +1,5 @@
 import { Calendar } from 'react-native-calendars';
-import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import { useEffect, useState } from 'react';
 import * as SQLite from 'expo-sqlite';
 import { SessionSummary, MarkedDates, DayObject, SessionDateRow } from '@/types';
@@ -71,66 +71,76 @@ export default function Record() {
   // 時間のフォーマット
   const formatDuration = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    
+    let result = '';
     if (hours > 0) {
-      return `${hours}時間${mins}分`;
+      result += `${hours}時間`;
     }
-    return `${mins}分`;
+    if (minutes > 0 || hours > 0) {
+      result += `${minutes}分`;
+    }
+    result += `${secs}秒`;
+    
+    return result;
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Calendar
-          onDayPress={handleDayPress}
-          markedDates={{
-            ...markedDates,
-            [selectedDate]: {
-              selected: true,
-              marked: markedDates[selectedDate]?.marked
-            }
-          }}
-          theme={{
-            selectedDayBackgroundColor: '#3498db',
-            dotColor: '#3498db',
-            todayTextColor: '#3498db'
-          }}
-        />
-        
-        {sessionSummary ? (
-          <View style={styles.statsContainer}>
-            <Text style={styles.title}>{selectedDate}の記録</Text>
-            
-            <View style={styles.statItem}>
-              <Text style={styles.label}>トレーニング時間</Text>
-              <Text style={styles.value}>
-                {formatDuration(sessionSummary.totalDuration)}
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.content}>
+          <Calendar
+            onDayPress={handleDayPress}
+            markedDates={{
+              ...markedDates,
+              [selectedDate]: {
+                selected: true,
+                marked: markedDates[selectedDate]?.marked
+              }
+            }}
+            theme={{
+              selectedDayBackgroundColor: '#3498db',
+              dotColor: '#3498db',
+              todayTextColor: '#3498db'
+            }}
+          />
+          
+          {sessionSummary ? (
+            <View style={styles.statsContainer}>
+              <Text style={styles.title}>{selectedDate}の記録</Text>
+              
+              <View style={styles.statItem}>
+                <Text style={styles.label}>トレーニング時間</Text>
+                <Text style={styles.value}>
+                  {formatDuration(sessionSummary.totalDuration)}
+                </Text>
+              </View>
+              
+              <View style={styles.statItem}>
+                <Text style={styles.label}>往復回数</Text>
+                <Text style={styles.value}>{sessionSummary.totalCount}回</Text>
+              </View>
+              
+              <View style={styles.statItem}>
+                <Text style={styles.label}>登った高さ</Text>
+                <Text style={styles.value}>{sessionSummary.totalHeight}m</Text>
+              </View>
+              
+              <View style={styles.statItem}>
+                <Text style={styles.label}>消費カロリー</Text>
+                <Text style={styles.value}>{sessionSummary.totalCalories}kcal</Text>
+              </View>
+            </View>
+          ) : selectedDate ? (
+            <View style={styles.noDataContainer}>
+              <Text style={styles.noDataText}>
+                {selectedDate}の記録はありません
               </Text>
             </View>
-            
-            <View style={styles.statItem}>
-              <Text style={styles.label}>往復回数</Text>
-              <Text style={styles.value}>{sessionSummary.totalCount}回</Text>
-            </View>
-            
-            <View style={styles.statItem}>
-              <Text style={styles.label}>登った高さ</Text>
-              <Text style={styles.value}>{sessionSummary.totalHeight}m</Text>
-            </View>
-            
-            <View style={styles.statItem}>
-              <Text style={styles.label}>消費カロリー</Text>
-              <Text style={styles.value}>{sessionSummary.totalCalories}kcal</Text>
-            </View>
-          </View>
-        ) : selectedDate ? (
-          <View style={styles.noDataContainer}>
-            <Text style={styles.noDataText}>
-              {selectedDate}の記録はありません
-            </Text>
-          </View>
-        ) : null}
-      </View>
+          ) : null}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -140,8 +150,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  content: {
+  scrollView: {
     flex: 1,
+  },
+  content: {
     padding: 20,
   },
   title: {
