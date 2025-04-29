@@ -1,11 +1,10 @@
 export type SessionSummary = {
-  totalSessions: number;
+  totalCount: number;
   totalCalories: number;
   totalHeight: number;
   totalDuration: number;
   sessions: {
-    start_time: string;
-    end_time: string;
+    duration: number;
   }[];
 };
 

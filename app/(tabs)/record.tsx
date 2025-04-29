@@ -8,8 +8,7 @@ type SessionData = {
   totalCount: number;
   totalCalories: number;
   totalHeight: number;
-  start_times: string;
-  end_times: string;
+  totalDuration: number;
 };
 
 export default function Record() {
@@ -42,7 +41,7 @@ export default function Record() {
     
     const db = SQLite.openDatabaseSync('kaidandiet.db');
     db.withTransactionSync(() => {
-      // 選択した日付の開始時刻のセッションを集計
+      // 選択した日付のセッションを集計
       const result = db.getAllSync(
         `SELECT 
           SUM(count) as totalCount,
@@ -56,25 +55,12 @@ export default function Record() {
       
       if (result && result.length > 0 && result[0].totalCount) {
         const data = result[0];
-        const start_times = data.start_times.split(',');
-        const end_times = data.end_times.split(',');
-        
-        // セッション時間の合計を計算
-        let totalDuration = 0;
-        const sessions = start_times.map((start: string, index: number) => {
-          const startTime = new Date(start);
-          const endTime = new Date(end_times[index]);
-          const duration = (endTime.getTime() - startTime.getTime()) / 1000 / 60; // 分単位
-          totalDuration += duration;
-          return { start_time: start, end_time: end_times[index] };
-        });
-
         setSessionSummary({
-          totalSessions: data.totalCount,
+          totalCount: data.totalCount,
           totalCalories: data.totalCalories,
           totalHeight: data.totalHeight,
-          totalDuration,
-          sessions
+          totalDuration: data.totalDuration,
+          sessions: [{ duration: data.totalDuration }]
         });
       } else {
         setSessionSummary(null);
@@ -83,9 +69,9 @@ export default function Record() {
   };
 
   // 時間のフォーマット
-  const formatDuration = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = Math.floor(minutes % 60);
+  const formatDuration = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
     if (hours > 0) {
       return `${hours}時間${mins}分`;
     }
@@ -124,7 +110,7 @@ export default function Record() {
             
             <View style={styles.statItem}>
               <Text style={styles.label}>往復回数</Text>
-              <Text style={styles.value}>{sessionSummary.totalSessions}回</Text>
+              <Text style={styles.value}>{sessionSummary.totalCount}回</Text>
             </View>
             
             <View style={styles.statItem}>
