@@ -11,8 +11,7 @@ export default function Session() {
     count: 0,
     calories: 0,
     height: 0,
-    start_time: new Date().toISOString(),
-    end_time: new Date().toISOString()
+    duration: 0
   });
 
   const handleCount = () => {
@@ -31,8 +30,17 @@ export default function Session() {
         {
           text: "終了",
           onPress: () => {
-            // ここで終了処理を実装予定
-            console.log("終了処理");
+            const endTime = new Date();
+            const startTime = new Date(sessionData.date);
+            const duration = Math.floor((endTime.getTime() - startTime.getTime()) / 1000);
+            
+            const db = SQLite.openDatabaseSync('kaidandiet.db');
+            db.withTransactionSync(() => {
+              db.runSync(
+                'INSERT INTO sessions (date, count, calories, height, duration) VALUES (?, ?, ?, ?, ?)',
+                [sessionData.date, count, 0, 0, duration]
+              );
+            });
           }
         }
       ]

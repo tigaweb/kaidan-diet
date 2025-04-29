@@ -24,7 +24,7 @@ export default function Record() {
     db.withTransactionSync(() => {
       // 記録のある日付を取得
       const result = db.getAllSync(
-        'SELECT DISTINCT date(start_time) as session_date FROM sessions;'
+        'SELECT DISTINCT date as session_date FROM sessions;'
       ) as SessionDateRow[];
       
       const marks: MarkedDates = {};
@@ -48,10 +48,9 @@ export default function Record() {
           SUM(count) as totalCount,
           SUM(calories) as totalCalories,
           SUM(height) as totalHeight,
-          GROUP_CONCAT(start_time) as start_times,
-          GROUP_CONCAT(end_time) as end_times
+          SUM(duration) as totalDuration
         FROM sessions 
-        WHERE date(start_time) = ?;`,
+        WHERE date = ?;`,
         [day.dateString]
       ) as SessionData[];
       

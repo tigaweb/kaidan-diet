@@ -4,6 +4,5 @@ export type SessionDBRow = {
   count: number;
   calories: number;
   height: number;
-  start_time: string;
-  end_time: string;
+  duration: number;  // 秒数
 }; 

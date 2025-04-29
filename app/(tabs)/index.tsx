@@ -23,7 +23,7 @@ export default function Index() {
       }
 
       db.execSync(
-        'CREATE TABLE IF NOT EXISTS sessions (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, start_time TEXT, end_time TEXT, count INTEGER, calories REAL, height INTEGER);'
+        'CREATE TABLE IF NOT EXISTS sessions (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, count INTEGER, calories REAL, height INTEGER, duration INTEGER);'
       );
 
       const result = db.getAllSync(
