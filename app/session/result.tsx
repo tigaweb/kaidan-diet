@@ -1,11 +1,43 @@
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as SQLite from 'expo-sqlite';
+import { METS_UP, METS_DOWN, METS_TIME_FACTOR, WEIGHT } from '@/constants/calculation';
+import { useState, useEffect } from 'react';
+
+type StairInfoRow = {
+  step_height: number;
+  step_count: number;
+};
 
 export default function Result() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { date, count, duration, height, calories } = params;
+  const { date, count, duration } = params;
+  const [stairInfo, setStairInfo] = useState<StairInfoRow | null>(null);
+  const [calculatedHeight, setCalculatedHeight] = useState(0);
+  const [calculatedCalories, setCalculatedCalories] = useState(0);
+
+  useEffect(() => {
+    const db = SQLite.openDatabaseSync('kaidandiet.db');
+    db.withTransactionSync(() => {
+      const result = db.getAllSync('SELECT step_height, step_count FROM stair_info LIMIT 1;') as StairInfoRow[];
+      if (result && result.length > 0) {
+        setStairInfo(result[0]);
+        
+        // 高さの計算（cmからmに変換）
+        const height = (result[0].step_height * result[0].step_count * Number(count)) / 100;
+        setCalculatedHeight(height);
+
+        // カロリーの計算
+        const durationInMinutes = Number(duration) / 60;
+        const upMets = height * Number(count) * METS_UP * METS_TIME_FACTOR;
+        const downMets = height * Number(count) * METS_DOWN * METS_TIME_FACTOR;
+        const totalMets = upMets + downMets;
+        const calories = (totalMets * WEIGHT * durationInMinutes) / 1000; // kcalに変換
+        setCalculatedCalories(Math.round(calories));
+      }
+    });
+  }, [count, duration]);
 
   const handleSave = () => {
     const db = SQLite.openDatabaseSync('kaidandiet.db');
@@ -15,8 +47,8 @@ export default function Result() {
         [
           date as string,
           Number(count),
-          Number(calories),
-          Number(height),
+          calculatedCalories,
+          calculatedHeight,
           Number(duration)
         ]
       );
@@ -81,12 +113,12 @@ export default function Result() {
             
             <View style={styles.resultItem}>
               <Text style={styles.label}>登った高さ</Text>
-              <Text style={styles.value}>{height}m</Text>
+              <Text style={styles.value}>{calculatedHeight}m</Text>
             </View>
             
             <View style={styles.resultItem}>
               <Text style={styles.label}>消費カロリー</Text>
-              <Text style={styles.value}>{calories}kcal</Text>
+              <Text style={styles.value}>{calculatedCalories}kcal</Text>
             </View>
           </View>
 
