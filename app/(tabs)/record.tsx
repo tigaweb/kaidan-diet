@@ -35,7 +35,13 @@ export default function Record() {
     });
   }, []);
 
-  // 日付選択時の処理
+  // 初期表示時に当日のデータを表示
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    setSelectedDate(today);
+    handleDayPress({ dateString: today } as DayObject);
+  }, []);
+
   const handleDayPress = (day: DayObject) => {
     setSelectedDate(day.dateString);
     
@@ -104,6 +110,8 @@ export default function Record() {
               dotColor: '#3498db',
               todayTextColor: '#3498db'
             }}
+            monthFormat="yyyy年MM月"
+            dayNames={['日', '月', '火', '水', '木', '金', '土']}
           />
           
           {sessionSummary ? (
