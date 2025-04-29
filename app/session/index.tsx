@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Alert } from 'r
 import { useEffect, useState, useRef } from 'react';
 import * as SQLite from 'expo-sqlite';
 import { SessionDBRow } from '@/types';
+import { useRouter } from 'expo-router';
 
 export default function Session() {
   const [count, setCount] = useState(0);
@@ -10,6 +11,7 @@ export default function Session() {
   const timerRef = useRef<NodeJS.Timeout>();
   const startTimeRef = useRef<Date>(new Date());
   const pausedDurationRef = useRef<number>(0);
+  const router = useRouter();
 
   const [sessionData, setSessionData] = useState<SessionDBRow>({
     id: 0,
@@ -71,12 +73,17 @@ export default function Session() {
         {
           text: "終了",
           onPress: () => {
-            const db = SQLite.openDatabaseSync('kaidandiet.db');
-            db.withTransactionSync(() => {
-              db.runSync(
-                'INSERT INTO sessions (date, count, calories, height, duration) VALUES (?, ?, ?, ?, ?)',
-                [sessionData.date, count, 0, 0, duration]
-              );
+            const height = count * 2.5; // 1往復あたり2.5mと仮定
+            const calories = Math.floor(duration * 0.1); // 1秒あたり0.1kcalと仮定
+            router.push({
+              pathname: '/session/result',
+              params: {
+                date: sessionData.date,
+                count,
+                duration,
+                height,
+                calories
+              }
             });
           }
         }
